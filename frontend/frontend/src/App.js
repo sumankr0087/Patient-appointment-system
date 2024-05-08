@@ -1,7 +1,15 @@
+import Addpatient from "./components/AddPatient";
+import PatientList from "./components/PatientList";
 function App() {
   return (
     <div>
-      <h1 className='flex justify-center text-[60px] bg-slate-500 text-white'>Patient Appointment System</h1>
+      <div className="flex justify-center bg-slate-500">
+        <h1 className='text-5xl font-normal py-4 text-white'>Patient Appointment System</h1>
+        <div className="mt-4 absolute right-5">
+          <Addpatient />
+        </div>
+      </div>
+      <PatientList/>
     </div>
   );
 }

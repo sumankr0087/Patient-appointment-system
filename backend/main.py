@@ -1,16 +1,28 @@
 from fastapi import FastAPI, Depends, HTTPException
 from models import Base
-from database import engine,SessionLocal
+from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-
 from schemas import PatientCreate, Patient
 from models import Patient as PatientModel
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Adding CORS middleware
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
-
-
-# Initialize FastAPI app
-app = FastAPI()
 
 # Dependency to get the database session
 def get_db():
@@ -29,6 +41,7 @@ async def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     db.refresh(db_patient)
     return db_patient
 
+# Endpoint to list all patients
 @app.get("/patients/", response_model=list[Patient])
 async def list_patients(db: Session = Depends(get_db)):
     patients = db.query(PatientModel).all()
