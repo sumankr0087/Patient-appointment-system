@@ -9,6 +9,7 @@ class PatientCreate(BaseModel):
     age: int
     gender: str
     address: str
+    has_appointment: bool
 
 # Schema for returning patient data
 class Patient(BaseModel):
@@ -19,6 +20,7 @@ class Patient(BaseModel):
     age: int
     gender: str
     address: str
+    has_appointment: bool
 
 # Schema for creating a new appointment
 class AppointmentCreate(BaseModel):

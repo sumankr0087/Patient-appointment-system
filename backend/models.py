@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -13,6 +13,7 @@ class Patient(Base):
     age = Column(Integer, index=True)
     gender = Column(String, index=True)
     address = Column(String, index=True)
+    has_appointment = Column(Boolean, default=False)
 
     # Define a relationship to appointments
     appointments = relationship("Appointment", back_populates="patient")

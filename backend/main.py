@@ -2,10 +2,12 @@ from fastapi import FastAPI, Depends, HTTPException
 from models import Base
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from schemas import PatientCreate, Patient
-from models import Patient as PatientModel
+from schemas import PatientCreate, Patient, AppointmentCreate, Appointment
+from models import Patient as PatientModel, Appointment as AppointmentModel
 from fastapi.middleware.cors import CORSMiddleware
+import stripe
 
+stripe.api_key = "sk_test_51PDyeXSApJKw7IbTTljrbZzIXdhRyKoSN9lhq073zZKJaDTBSLsfisEZKAFpaTCMVUmWyfcWVyleVhzsG7lBQ1a0005ZbEQeix"
 app = FastAPI()
 
 # Adding CORS middleware
@@ -54,3 +56,40 @@ async def read_patient(patient_id: int, db: Session = Depends(get_db)):
     if db_patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return db_patient
+
+# Endpoint to create an appointment for a patient
+@app.post("/patients/{patient_id}/appointments/", response_model=Appointment)
+async def create_appointment_for_patient(
+    patient_id: int, 
+    appointment: AppointmentCreate, 
+    db: Session = Depends(get_db)
+):
+    # Create the appointment in the database
+    db_appointment = AppointmentModel(
+        patient_id=patient_id,
+        datetime=appointment.datetime
+    )
+    db.add(db_appointment)
+    db.commit()
+    db.refresh(db_appointment)
+
+    patient = db.query(PatientModel).get(patient_id)
+    patient.has_appointment = True
+    db.commit()
+    
+    # Generate payment link using Stripe API
+    payment_intent = stripe.PaymentIntent.create(
+        amount=1000,  # Specify the amount for the appointment
+        currency="inr",
+        description="Appointment Payment",
+        payment_method_types=["card"],
+    )
+    payment_client_secret = payment_intent.client_secret
+    print("xxxxx",payment_intent)
+    
+    return {
+        "id": db_appointment.id,
+        "patient_id": db_appointment.patient_id,
+        "datetime": db_appointment.datetime,
+        "payment_client_secret": payment_client_secret
+    }
