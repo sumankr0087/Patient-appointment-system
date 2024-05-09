@@ -90,7 +90,11 @@ function PatientList() {
                             <td className="px-6 py-4 text-sm">{patient.gender}</td>
                             <td className="px-6 py-4 text-sm">{patient.address}</td>
                             <td className="px-6 py-4 text-sm">
-                                <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={() => handleAppointmentClick(patient)}>Appointment</button>
+                                {patient.has_appointment ? (
+                                    "Booked"
+                                ) : (
+                                    <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={() => handleAppointmentClick(patient)}>Appointment</button>
+                                )}
                             </td>
                         </tr>
                     ))}
