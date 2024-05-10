@@ -10,6 +10,7 @@ function PatientList() {
     const [modalPatientDetails, setmodalPatientDetails] = useState(false);
     const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
     const [searchName, setSearchName] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
 
     const fetchPatientList = async () => {
         try {
@@ -45,9 +46,8 @@ function PatientList() {
             }
             const data = await response.json();
             setSelectedPatientDetails(data);
+            setmodalPatientDetails(true);
             }
-            
-            
         } catch (error) {
             console.error('Error fetching patient details:', error);
         }
@@ -60,29 +60,38 @@ function PatientList() {
     const handleSearchChange = (event) => {
         setSearchName(event.target.value);
     };
-    const handleClear = (event) => {
-        setSearchName(event.target.value === '');
-        window.location.reload();
-    }
 
-    const handleSearchSubmit = () => {
+    const handleClear = () => {
+        setSearchName('');
+        setSearchResults([]);
+        fetchPatientList();
+    };
+
+    const handleSearchSubmit = async () => {
         if (searchName.trim() !== '') {
-            fetchPatientDetails(searchName);
-            setSelectedPatient(null);
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/patients/${searchName}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch search results');
+                }
+                const data = await response.json();
+                setSearchResults([data]);
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+            }
         } else {
-            fetchPatientList();
+            setSearchResults([]);
         }
     };
 
-    useEffect(() => {
-        fetchPatientList();
-        fetchPatientDetails()
-    }, []);
-
     const handlePatientClick = (patient) => {
         fetchPatientDetails(patient.name);
-        setmodalPatientDetails(true);
-
     };
 
     const handleAppointmentClick = (patient) => {
@@ -131,8 +140,7 @@ function PatientList() {
                     className="px-4 py-2 border border-gray-300 rounded mb-4"
                 />
                 <button onClick={handleSearchSubmit} className="px-4 ml-2 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Search</button>
-                <button onClick={handleClear} className="px-4 py-2 ml-2 bg-gray-500 text-white rounded hover:bg-blue-600">clear</button>
-
+                <button onClick={handleClear} className="px-4 py-2 ml-2 bg-gray-500 text-white rounded hover:bg-blue-600">Clear</button>
             </div>
             <div>
                 <div className='grid grid-cols-4 border-b border-gray-200'>
@@ -143,53 +151,28 @@ function PatientList() {
                             <div className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone No.</div>
                         </div>
                     </div>
-
                     <div className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</div>
                 </div>
             </div>
             <div>
-                {selectedPatientDetails ? (
-                    <div>
-                        <div className='grid grid-cols-4 border-b border-gray-200 hover:bg-gray-200 cursor-pointer'
-                        >
-                            <div className='col-span-3'>
-                                <div className='grid grid-cols-3' onClick={() => handlePatientClick(selectedPatientDetails)}>
-                                    <div className="px-6 py-4 text-sm">{selectedPatientDetails.name}</div>
-                                    <div className="px-6 py-4 text-sm">{selectedPatientDetails.email}</div>
-                                    <div className="px-6 py-4 text-sm">{selectedPatientDetails.phone}</div>
-                                </div>
+                {(searchName.trim() !== '' && searchResults.length > 0 ? searchResults : patients).map(patient => (
+                    <div key={patient.id} className='grid grid-cols-4 border-b border-gray-200 hover:bg-gray-200 cursor-pointer'>
+                        <div className='col-span-3'>
+                            <div className='grid grid-cols-3' onClick={() => handlePatientClick(patient)}>
+                                <div className="px-6 py-4 text-sm">{patient.name}</div>
+                                <div className="px-6 py-4 text-sm">{patient.email}</div>
+                                <div className="px-6 py-4 text-sm">{patient.phone}</div>
                             </div>
-                            <div className="px-6 py-4 text-sm">
-                                {selectedPatientDetails.has_appointment ? (
-                                    <div className='text-sm text-red-600'>Booked</div>
-                                ) : (
-                                    <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={() => handleAppointmentClick(selectedPatientDetails)}>Appointment</button>
-                                )}
-                            </div>
+                        </div>
+                        <div className="px-6 py-4 text-sm">
+                            {patient.has_appointment ? (
+                                <div className='text-sm text-red-600'>Booked</div>
+                            ) : (
+                                <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={() => handleAppointmentClick(patient)}>Appointment</button>
+                            )}
                         </div>
                     </div>
-                ) : (
-                    patients.map(patient => (
-                        <div key={patient.id} className='grid grid-cols-4 border-b border-gray-200 hover:bg-gray-200 cursor-pointer'
-                        >
-                            <div className='col-span-3'>
-                                <div className='grid grid-cols-3' onClick={() => handlePatientClick(patient)}>
-                                    <div className="px-6 py-4 text-sm">{patient.name}</div>
-                                    <div className="px-6 py-4 text-sm">{patient.email}</div>
-                                    <div className="px-6 py-4 text-sm">{patient.phone}</div>
-                                </div>
-                            </div>
-                            <div className="px-6 py-4 text-sm">
-                                {patient.has_appointment ? (
-                                    <div className='text-sm text-red-600'>Booked</div>
-                                ) : (
-                                    <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={() => handleAppointmentClick(patient)}>Appointment</button>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
-
+                ))}
             </div>
             <AppointmentModal
                 selectedPatient={selectedPatient}
