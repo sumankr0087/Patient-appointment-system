@@ -1,5 +1,5 @@
 import Addpatient from "./components/AddPatient";
-import PatientList from "./components/PatientList";
+import PatientList from "./PatientList";
 function App() {
   return (
     <div>

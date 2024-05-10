@@ -7,7 +7,8 @@ function AddPatient() {
         phone: '',
         age: '',
         gender: '',
-        address: ''
+        address: '',
+        has_appointment:false,
     });
 
     const openModal = () => {
