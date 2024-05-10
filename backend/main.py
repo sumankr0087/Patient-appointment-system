@@ -50,9 +50,9 @@ async def list_patients(db: Session = Depends(get_db)):
     return patients
 
 # Endpoint to get a patient by ID
-@app.get("/patients/{patient_id}", response_model=Patient)
-async def read_patient(patient_id: int, db: Session = Depends(get_db)):
-    db_patient = db.query(PatientModel).filter(PatientModel.id == patient_id).first()
+@app.get("/patients/{patient_name}", response_model=Patient)
+async def read_patient(patient_name: str, db: Session = Depends(get_db)):
+    db_patient = db.query(PatientModel).filter(PatientModel.name == patient_name).first()
     if db_patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
     return db_patient

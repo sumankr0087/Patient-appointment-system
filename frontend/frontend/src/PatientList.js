@@ -9,7 +9,7 @@ function PatientList() {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalPatientDetails, setmodalPatientDetails] = useState(false);
     const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
-    const [searchId, setSearchId] = useState('');
+    const [searchName, setSearchName] = useState('');
 
     const fetchPatientList = async () => {
         try {
@@ -30,9 +30,10 @@ function PatientList() {
         }
     };
 
-    const fetchPatientDetails = async (id) => {
+    const fetchPatientDetails = async (name) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/patients/${id}`, {
+            if (name) {
+                const response = await fetch(`http://127.0.0.1:8000/patients/${name}`, {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
@@ -44,6 +45,9 @@ function PatientList() {
             }
             const data = await response.json();
             setSelectedPatientDetails(data);
+            }
+            
+            
         } catch (error) {
             console.error('Error fetching patient details:', error);
         }
@@ -54,16 +58,16 @@ function PatientList() {
     }, []);
 
     const handleSearchChange = (event) => {
-        setSearchId(event.target.value);
+        setSearchName(event.target.value);
     };
     const handleClear = (event) => {
-        setSearchId(event.target.value === '');
+        setSearchName(event.target.value === '');
         window.location.reload();
     }
 
     const handleSearchSubmit = () => {
-        if (searchId.trim() !== '') {
-            fetchPatientDetails(searchId);
+        if (searchName.trim() !== '') {
+            fetchPatientDetails(searchName);
             setSelectedPatient(null);
         } else {
             fetchPatientList();
@@ -76,7 +80,7 @@ function PatientList() {
     }, []);
 
     const handlePatientClick = (patient) => {
-        fetchPatientDetails(patient.id);
+        fetchPatientDetails(patient.name);
         setmodalPatientDetails(true);
 
     };
@@ -122,7 +126,7 @@ function PatientList() {
                 <input
                     type="text"
                     placeholder="Enter Patient ID"
-                    value={searchId}
+                    value={searchName}
                     onChange={handleSearchChange}
                     className="px-4 py-2 border border-gray-300 rounded mb-4"
                 />
