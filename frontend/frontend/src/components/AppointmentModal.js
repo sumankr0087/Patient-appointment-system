@@ -7,7 +7,7 @@ function AppointmentModal({ selectedPatient, modalOpen, setModalOpen, setAppoint
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
                 <div className="bg-white p-8 rounded-md">
                     <div className="text-lg font-semibold mb-4">Schedule Appointment for-
-                        <span className='ml-2'>{selectedPatient && selectedPatient.name}</span> </div>
+                        <span className='ml-2 text-sm font-medium'>{selectedPatient && selectedPatient.name}</span> </div>
                     <div className='flex flex-col'>
                         <input
                             type="datetime-local"
