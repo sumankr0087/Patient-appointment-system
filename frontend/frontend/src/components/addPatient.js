@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { addPatient } from '../api/apiService';
+
 function AddPatient() {
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -8,7 +10,7 @@ function AddPatient() {
         age: '',
         gender: '',
         address: '',
-        has_appointment:false,
+        has_appointment: false,
     });
 
     const openModal = () => {
@@ -21,21 +23,10 @@ function AddPatient() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try {
-            const response = await fetch('http://127.0.0.1:8000/patients/', {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-            if (response.ok) {
-                closeModal();
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error('Error:', error);
+        const isSuccess = await addPatient(formData);
+        if (isSuccess) {
+            closeModal();
+            window.location.reload();
         }
     };
 
@@ -51,7 +42,7 @@ function AddPatient() {
             <div className='flex justify-center mt-2 gap-4'>
                 <button className='border border-green-500 bg-green-500 rounded text-white px-2 py-2' onClick={openModal}>Add Patient</button>
             </div>
-            {showModal && (
+                    { showModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
                     <div className="bg-white p-6 rounded-lg">
                         <h2 className="flex justify-center text-lg font-semibold mb-4">Enter Patient Details</h2>
@@ -93,7 +84,7 @@ function AddPatient() {
                     </div>
                 </div>
             )}
-        </div>
+        </div >
     );
 }
 

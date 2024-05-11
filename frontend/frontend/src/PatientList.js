@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AppointmentModal from './components/AppointmentModal';
 import PatientDetailsModal from './components/PatientDetailsModal';
+import { fetchPatientList, fetchPatientDetails, addAppointmentSubmit } from './api/apiService';
 
 function PatientList() {
     const [patients, setPatients] = useState([]);
@@ -12,50 +13,26 @@ function PatientList() {
     const [searchName, setSearchName] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
-    const fetchPatientList = async () => {
-        try {
-            const response = await fetch('http://127.0.0.1:8000/patients/', {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch patient list');
-            }
-            const data = await response.json();
-            setPatients(data);
-        } catch (error) {
-            console.error('Error fetching patient list:', error);
-        }
-    };
-
-    const fetchPatientDetails = async (name) => {
-        try {
-            if (name) {
-                const response = await fetch(`http://127.0.0.1:8000/patients/${name}`, {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch patient details');
-            }
-            const data = await response.json();
-            setSelectedPatientDetails(data);
-            setmodalPatientDetails(true);
-            }
-        } catch (error) {
-            console.error('Error fetching patient details:', error);
-        }
-    };
-
     useEffect(() => {
-        fetchPatientList();
+        const fetchData = async () => {
+            const data = await fetchPatientList();
+            setPatients(data);
+        };
+        fetchData();
     }, []);
+
+    const handleSearchSubmit = async () => {
+        if (searchName.trim() !== '') {
+            const data = await fetchPatientDetails(searchName);
+            if (data) {
+                setSearchResults([data]);
+            } else {
+                setSearchResults([]);
+            }
+        } else {
+            setSearchResults([]);
+        }
+    };
 
     const handleSearchChange = (event) => {
         setSearchName(event.target.value);
@@ -67,31 +44,13 @@ function PatientList() {
         fetchPatientList();
     };
 
-    const handleSearchSubmit = async () => {
-        if (searchName.trim() !== '') {
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/patients/${searchName}`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch search results');
-                }
-                const data = await response.json();
-                setSearchResults([data]);
-            } catch (error) {
-                console.error('Error fetching search results:', error);
-            }
-        } else {
-            setSearchResults([]);
-        }
-    };
+
 
     const handlePatientClick = (patient) => {
-        fetchPatientDetails(patient.name);
+        fetchPatientDetails(patient.name).then(data => {
+            setSelectedPatientDetails(data);
+            setmodalPatientDetails(true);
+        });
     };
 
     const handleAppointmentClick = (patient) => {
@@ -105,27 +64,7 @@ function PatientList() {
     };
 
     const handleAppointmentSubmit = async () => {
-        const appointmentData = {
-            patient_id: selectedPatient.id,
-            datetime: appointmentDateTime,
-        };
-
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/patients/${selectedPatient.id}/appointments/`, {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(appointmentData),
-            });
-            if (!response.ok) {
-                throw new Error('Failed to create appointment');
-            }
-            handleAppointmentSuccess();
-        } catch (error) {
-            console.error('Error creating appointment:', error);
-        }
+        addAppointmentSubmit(selectedPatient, appointmentDateTime, handleAppointmentSuccess);
     };
 
     return (
