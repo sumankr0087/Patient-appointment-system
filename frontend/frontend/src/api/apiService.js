@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = process.env.REACT_APP_API_KEY;
 
 export const fetchPatientList = async () => {
     try {
@@ -44,7 +44,7 @@ export const fetchPatientDetails = async (name) => {
 // Add Patient api
 export const addPatient = async (formData) => {
     try {
-        const response = await fetch('http://127.0.0.1:8000/patients/', {
+        const response = await fetch(`${API_URL}/patients/`, {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -70,7 +70,7 @@ export const addAppointmentSubmit = async (selectedPatient, appointmentDateTime,
     };
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/patients/${selectedPatient.id}/appointments/`, {
+        const response = await fetch(`${API_URL}/patients/${selectedPatient.id}/appointments/`, {
             method: 'POST',
             mode: 'cors',
             headers: {
