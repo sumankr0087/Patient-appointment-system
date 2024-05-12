@@ -17,3 +17,4 @@ npm start
 1. Create virtual environments for the project - python3 -m venv venv
 2. Install requirements.txt file - pip install -r requirements.txt
 3. Start the server - uvicorn main:app --reload
+4. Create the .env file to add backend server urls in frontend/frontend root folder
