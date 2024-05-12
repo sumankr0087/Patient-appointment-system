@@ -6,8 +6,9 @@ from schemas import PatientCreate, Patient, AppointmentCreate, Appointment
 from models import Patient as PatientModel, Appointment as AppointmentModel
 from fastapi.middleware.cors import CORSMiddleware
 import stripe
+from functools import lru_cache
+from config import Settings
 
-stripe.api_key = "sk_test_51PDyeXSApJKw7IbTTljrbZzIXdhRyKoSN9lhq073zZKJaDTBSLsfisEZKAFpaTCMVUmWyfcWVyleVhzsG7lBQ1a0005ZbEQeix"
 app = FastAPI()
 
 # Adding CORS middleware
@@ -33,6 +34,13 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@lru_cache()
+def get_settings():
+    return Settings()
+
+settings = get_settings()
+stripe.api_key = settings.SECRET_KEY
 
 # Endpoint to create a new patient
 @app.post("/patients/", response_model=Patient)
